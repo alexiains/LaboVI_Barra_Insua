@@ -126,3 +126,73 @@ def diferencia_centrada(f, x, h):
     if h == 0:
         raise ValueError("El tamaño de paso h no puede ser cero.")
     return (f(x + h) - f(x - h)) / (2.0 * h)
+
+# SISTEMAS DE ECUACIONES LINEALES (GAUSS)
+
+def gauss_sin_pivoteo(A_mat, b_vec):
+    n = len(b_vec)
+    A = [[float(A_mat[i][j]) for j in range(n)] for i in range(n)]
+    b = [float(b_vec[i]) for i in range(n)]
+
+    # Eliminacion hacia adelante
+    for q in range(n - 1):
+        if abs(A[q][q]) < 1e-14:
+            return None, f"Pivote nulo detectado. A[{q+1}][{q+1}] = 0 en la etapa {q+1}. Gauss sin pivoteo cancelado."
+        for k in range(q + 1, n):
+            m = A[k][q] / A[q][q]
+            for j in range(q, n):
+                A[k][j] -= m * A[q][j]
+            b[k] -= m * b[q]
+
+    if abs(A[n-1][n-1]) < 1e-14:
+        return None, f"Pivote nulo detectado. A[{n}][{n}] = 0 en el último elemento diagonal."
+
+    # Sustitucion regresiva
+    x = [0.0] * n
+    for i in range(n - 1, -1, -1):
+        suma = 0.0
+        for j in range(i + 1, n):
+            suma += A[i][j] * x[j]
+        x[i] = (b[i] - suma) / A[i][i]
+
+    return x, None
+
+def gauss_con_pivoteo(A_mat, b_vec):
+    n = len(b_vec)
+    A = [[float(A_mat[i][j]) for j in range(n)] for i in range(n)]
+    b = [float(b_vec[i]) for i in range(n)]
+
+    # Eliminacion hacia adelante con pivoteo parcial
+    for q in range(n - 1):
+        p = q
+        max_val = abs(A[q][q])
+        for i in range(q + 1, n):
+            if abs(A[i][q]) > max_val:
+                max_val = abs(A[i][q])
+                p = i
+
+        if max_val < 1e-14:
+            return None, "El sistema es singular o no posee solución única."
+
+        if p != q:
+            A[q], A[p] = A[p], A[q]
+            b[q], b[p] = b[p], b[q]
+
+        for k in range(q + 1, n):
+            m = A[k][q] / A[q][q]
+            for j in range(q, n):
+                A[k][j] -= m * A[q][j]
+            b[k] -= m * b[q]
+
+    if abs(A[n-1][n-1]) < 1e-14:
+        return None, "El sistema es singular (matriz no invertible)."
+
+    # Sustitucion regresiva
+    x = [0.0] * n
+    for i in range(n - 1, -1, -1):
+        suma = 0.0
+        for j in range(i + 1, n):
+            suma += A[i][j] * x[j]
+        x[i] = (b[i] - suma) / A[i][i]
+
+    return x, None
