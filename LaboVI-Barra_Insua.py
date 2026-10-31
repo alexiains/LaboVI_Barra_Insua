@@ -239,7 +239,7 @@ class AplicacionCalculoNumerico(tk.Tk):
         frame_operaciones = ttk.Frame(self.scrollable_frame)
         frame_operaciones.pack(fill=tk.BOTH, expand=True, pady=5)
 
-        # RAiCES
+        # RAICES
         self.crear_seccion_raices(frame_operaciones)
 
         # DIFERENCIACIÓN
@@ -271,3 +271,150 @@ class AplicacionCalculoNumerico(tk.Tk):
             txt = ent.get().strip()
             coefs.append(float(txt) if txt else 0.0)
         return coefs
+
+    # RAICES DE ECUACIONES
+
+    def crear_seccion_raices(self, parent):
+        frame = ttk.LabelFrame(parent, text=" 1. Raíces de Polinomios ", padding=10)
+        frame.grid(row=0, column=0, sticky=tk.NSEW, padx=5, pady=5)
+        parent.columnconfigure(0, weight=1)
+
+        ttk.Label(frame, text="Método:").grid(row=0, column=0, sticky=tk.E, padx=5, pady=2)
+        self.var_metodo = tk.StringVar(value="Bisección")
+        cb_metodo = ttk.Combobox(frame, textvariable=self.var_metodo, state="readonly", width=16,
+                                 values=["Bisección", "Newton-Raphson", "Secante"])
+        cb_metodo.grid(row=0, column=1, sticky=tk.W, padx=5, pady=2)
+        cb_metodo.bind("<<ComboboxSelected>>", self.on_metodo_change)
+
+        self.lbl_p1 = ttk.Label(frame, text="Límite inferior (xl):")
+        self.lbl_p1.grid(row=1, column=0, sticky=tk.E, padx=5, pady=2)
+        self.ent_p1 = ttk.Entry(frame, width=12)
+        self.ent_p1.grid(row=1, column=1, sticky=tk.W, padx=5, pady=2)
+
+        self.lbl_p2 = ttk.Label(frame, text="Límite superior (xu):")
+        self.lbl_p2.grid(row=2, column=0, sticky=tk.E, padx=5, pady=2)
+        self.ent_p2 = ttk.Entry(frame, width=12)
+        self.ent_p2.grid(row=2, column=1, sticky=tk.W, padx=5, pady=2)
+
+        self.var_stop_type = tk.StringVar(value="es")
+        rb_es = ttk.Radiobutton(frame, text="Error εs (%)", variable=self.var_stop_type, value="es", command=self.on_stop_type_change)
+        rb_es.grid(row=3, column=0, sticky=tk.E, padx=5)
+        rb_cifras = ttk.Radiobutton(frame, text="Cifras sig. (n)", variable=self.var_stop_type, value="cifras", command=self.on_stop_type_change)
+        rb_cifras.grid(row=3, column=1, sticky=tk.W, padx=5)
+
+        self.lbl_val_stop = ttk.Label(frame, text="Valor εs (%):")
+        self.lbl_val_stop.grid(row=4, column=0, sticky=tk.E, padx=5, pady=2)
+        self.ent_val_stop = ttk.Entry(frame, width=12)
+        self.ent_val_stop.grid(row=4, column=1, sticky=tk.W, padx=5, pady=2)
+
+        ttk.Label(frame, text="Máx. Iteraciones:").grid(row=5, column=0, sticky=tk.E, padx=5, pady=2)
+        self.ent_imax = ttk.Entry(frame, width=12)
+        self.ent_imax.grid(row=5, column=1, sticky=tk.W, padx=5, pady=2)
+
+        btn_calc = ttk.Button(frame, text="Calcular Raíz", command=self.calcular_raiz)
+        btn_calc.grid(row=6, column=0, columnspan=2, pady=8)
+
+        frame_res = ttk.Frame(frame)
+        frame_res.grid(row=7, column=0, columnspan=2, sticky=tk.W, pady=2)
+
+        self.lbl_res_raiz = ttk.Label(frame_res, text="Raíz (xr): ---", font=('Helvetica', 9, 'bold'))
+        self.lbl_res_raiz.pack(anchor=tk.W)
+        self.lbl_res_iters = ttk.Label(frame_res, text="Iteraciones: ---")
+        self.lbl_res_iters.pack(anchor=tk.W)
+        self.lbl_res_ea = ttk.Label(frame_res, text="Error ea (%): ---")
+        self.lbl_res_ea.pack(anchor=tk.W)
+        self.lbl_res_fxr = ttk.Label(frame_res, text="f(xr): ---")
+        self.lbl_res_fxr.pack(anchor=tk.W)
+
+    def on_metodo_change(self, event=None):
+        met = self.var_metodo.get()
+        if met == "Bisección":
+            self.lbl_p1.config(text="Límite inferior (xl):")
+            self.lbl_p2.config(text="Límite superior (xu):")
+            self.ent_p1.delete(0, tk.END)
+            self.ent_p2.delete(0, tk.END)
+            self.ent_p2.config(state=tk.NORMAL)
+        elif met == "Newton-Raphson":
+            self.lbl_p1.config(text="Valor inicial (x0):")
+            self.lbl_p2.config(text="---")
+            self.ent_p1.delete(0, tk.END)
+            self.ent_p2.delete(0, tk.END)
+            self.ent_p2.config(state=tk.DISABLED)
+        elif met == "Secante":
+            self.lbl_p1.config(text="Valor inicial (x-1):")
+            self.lbl_p2.config(text="Valor inicial (x0):")
+            self.ent_p1.delete(0, tk.END)
+            self.ent_p2.config(state=tk.NORMAL)
+            self.ent_p2.delete(0, tk.END)
+
+    def on_stop_type_change(self):
+        self.ent_val_stop.delete(0, tk.END)
+        if self.var_stop_type.get() == "es":
+            self.lbl_val_stop.config(text="Valor εs (%):")
+        else:
+            self.lbl_val_stop.config(text="Cifras significativas (n):")
+
+    def calcular_raiz(self):
+        try:
+            coefs = self.obtener_coeficientes()
+            if all(c == 0 for c in coefs):
+                messagebox.showwarning("Atención", "Por favor ingrese al menos un coeficiente no nulo en P(x).")
+                return
+
+            f = lambda x: evaluar_polinomio(coefs, x)
+            df = lambda x: evaluar_derivada_polinomio(coefs, x)
+
+            txt_imax = self.ent_imax.get().strip()
+            imax = int(txt_imax) if txt_imax else 100
+
+            txt_stop = self.ent_val_stop.get().strip()
+            if not txt_stop:
+                messagebox.showerror("Error", "Ingrese el criterio de parada (εs o n).")
+                return
+
+            if self.var_stop_type.get() == "es":
+                es = float(txt_stop)
+                n_cifras = 4
+            else:
+                n = int(txt_stop)
+                n_cifras = n
+                es = 0.5 * (10.0 ** (2.0 - n))
+
+            metodo = self.var_metodo.get()
+
+            if metodo == "Bisección":
+                if not self.ent_p1.get().strip() or not self.ent_p2.get().strip():
+                    messagebox.showerror("Error", "Ingrese xl y xu para Bisección.")
+                    return
+                xl = float(self.ent_p1.get())
+                xu = float(self.ent_p2.get())
+                xr, iters, ea, err = biseccion(f, xl, xu, es, imax)
+            elif metodo == "Newton-Raphson":
+                if not self.ent_p1.get().strip():
+                    messagebox.showerror("Error", "Ingrese x0 para Newton-Raphson.")
+                    return
+                x0 = float(self.ent_p1.get())
+                xr, iters, ea, err = newton_raphson(f, df, x0, es, imax)
+            elif metodo == "Secante":
+                if not self.ent_p1.get().strip() or not self.ent_p2.get().strip():
+                    messagebox.showerror("Error", "Ingrese x-1 y x0 para Secante.")
+                    return
+                xm1 = float(self.ent_p1.get())
+                x0 = float(self.ent_p2.get())
+                xr, iters, ea, err = secante(f, xm1, x0, es, imax)
+
+            if err or xr is None:
+                messagebox.showwarning("Atención", err or "No se encontró la raíz.")
+                self.lbl_res_raiz.config(text="Raíz (xr): NO ENCONTRADA")
+                self.lbl_res_iters.config(text=f"Iteraciones: {iters}")
+                self.lbl_res_ea.config(text="Error ea (%): ---")
+                self.lbl_res_fxr.config(text="f(xr): ---")
+            else:
+                xr_fmt = formatear_cifras_significativas(xr, n_cifras)
+                self.lbl_res_raiz.config(text=f"Raíz (xr): {xr_fmt} ({xr:.6f})")
+                self.lbl_res_iters.config(text=f"Iteraciones: {iters}")
+                self.lbl_res_ea.config(text=f"Error ea (%): {ea:.6f} %")
+                self.lbl_res_fxr.config(text=f"f(xr): {f(xr):.6e}")
+
+        except ValueError:
+            messagebox.showerror("Error de entrada", "Ingrese valores numéricos válidos.")
