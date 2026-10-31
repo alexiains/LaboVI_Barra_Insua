@@ -445,3 +445,34 @@ def crear_seccion_derivacion(self, parent):
         self.lbl_res_exacta.pack(anchor=tk.W, pady=2)
         self.lbl_res_err_deriv = ttk.Label(frame_res, text="Error verd. et (%): ---")
         self.lbl_res_err_deriv.pack(anchor=tk.W, pady=2)
+
+def calcular_derivada(self):
+        try:
+            if not self.ent_deriv_x.get().strip() or not self.ent_deriv_h.get().strip():
+                messagebox.showerror("Error", "Ingrese el punto x y el paso h.")
+                return
+
+            x = float(self.ent_deriv_x.get())
+            h = float(self.ent_deriv_h.get())
+            if h <= 0:
+                messagebox.showerror("Error", "El paso h debe ser mayor a cero.")
+                return
+
+            coefs = self.obtener_coeficientes()
+            if all(c == 0 for c in coefs):
+                messagebox.showwarning("Atención", "Ingrese coeficientes en la sección del Polinomio P(x).")
+                return
+
+            f = lambda x_val: evaluar_polinomio(coefs, x_val)
+            df = lambda x_val: evaluar_derivada_polinomio(coefs, x_val)
+
+            d_aprox = diferencia_centrada(f, x, h)
+            d_exacta = df(x)
+
+            et = abs((d_exacta - d_aprox) / d_exacta) * 100.0 if d_exacta != 0 else 0.0
+
+            self.lbl_res_deriv.config(text=f"Derivada aprox. f'({x}): {d_aprox:.8f}")
+            self.lbl_res_exacta.config(text=f"Derivada exacta: {d_exacta:.8f}")
+            self.lbl_res_err_deriv.config(text=f"Error verd. et: {et:.6f} %")
+        except ValueError:
+            messagebox.showerror("Error de entrada", "Ingrese valores numéricos válidos.")
