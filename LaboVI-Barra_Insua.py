@@ -119,3 +119,10 @@ def secante(f, x_minus1, x0, es, imax):
             return x_curr, iter_count, ea, None
 
     return x_curr, iter_count, ea, "Se alcanzó el número máximo de iteraciones."    
+
+# DIFERENCIACIÓN NUMÉRICA
+
+def diferencia_centrada(f, x, h):
+    if h == 0:
+        raise ValueError("El tamaño de paso h no puede ser cero.")
+    return (f(x + h) - f(x - h)) / (2.0 * h)
