@@ -32,4 +32,90 @@ def formatear_cifras_significativas(valor, cifras):
         return f"{valor:.{cifras}g}"
     except Exception:
         return str(valor)
-    
+
+# RAÍCES DE ECUACIONES
+
+def biseccion(f, xl, xu, es, imax):
+    fl = f(xl)
+    fu = f(xu)
+    if fl * fu > 0:
+        return None, 0, 0.0, "El intervalo [xl, xu] no encierra una raíz (sin cambio de signo)."
+
+    xr = xl
+    ea = 100.0
+    iter_count = 0
+
+    for i in range(1, imax + 1):
+        xrold = xr
+        xr = (xl + xu) / 2.0
+        iter_count = i
+
+        if xr != 0:
+            ea = abs((xr - xrold) / xr) * 100.0
+
+        fr = f(xr)
+        test = fl * fr
+
+        if test < 0:
+            xu = xr
+            fu = fr
+        elif test > 0:
+            xl = xr
+            fl = fr
+        else:
+            ea = 0.0
+
+        if ea < es:
+            return xr, iter_count, ea, None
+
+    return xr, iter_count, ea, "Se alcanzó el número máximo de iteraciones."
+
+def newton_raphson(f, df, x0, es, imax):
+    x = x0
+    ea = 100.0
+    iter_count = 0
+
+    for i in range(1, imax + 1):
+        xold = x
+        d = df(x)
+        if abs(d) < 1e-14:
+            return None, i, ea, f"Derivada analítica nula o casi nula en x = {x:.6f}."
+
+        x = xold - f(xold) / d
+        iter_count = i
+
+        if x != 0:
+            ea = abs((x - xold) / x) * 100.0
+
+        if ea < es:
+            return x, iter_count, ea, None
+
+    return x, iter_count, ea, "Se alcanzó el número máximo de iteraciones."
+
+def secante(f, x_minus1, x0, es, imax):
+    x_prev = x_minus1
+    x_curr = x0
+    ea = 100.0
+    iter_count = 0
+
+    for i in range(1, imax + 1):
+        f_prev = f(x_prev)
+        f_curr = f(x_curr)
+
+        denom = f_curr - f_prev
+        if abs(denom) < 1e-14:
+            return None, i, ea, "Denominador nulo en el método de la secante."
+
+        x_next = x_curr - (f_curr * (x_prev - x_curr)) / (f_prev - f_curr)
+        iter_count = i
+
+        if x_next != 0:
+            ea = abs((x_next - x_curr) / x_next) * 100.0
+
+        x_prev = x_curr
+        x_curr = x_next
+
+        if ea < es:
+            return x_curr, iter_count, ea, None
+
+    return x_curr, iter_count, ea, "Se alcanzó el número máximo de iteraciones."    
