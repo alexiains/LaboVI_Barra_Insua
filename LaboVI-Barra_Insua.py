@@ -221,8 +221,8 @@ def simpson_13_compuesta(f, a, b, n):
 # INTERFAZ GRAFICA
 
 class AplicacionCalculoNumerico(tk.Tk):
-    def _init_(self):
-        super()._init_()
+    def __init__(self):
+        super().__init__()
         self.title("Laboratorio VI.1 - Calculo Numerico")
         self.minsize(850, 600)
 
@@ -613,3 +613,7 @@ class AplicacionCalculoNumerico(tk.Tk):
                 self.lbl_res_h.config(text=f"Ancho h = {h:.6f}")
         except ValueError:
             messagebox.showerror("Error de entrada", "Ingrese valores numéricos válidos.")
+
+if __name__ == "__main__":
+    app = AplicacionCalculoNumerico()
+    app.mainloop()
