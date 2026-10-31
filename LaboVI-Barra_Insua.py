@@ -476,3 +476,81 @@ class AplicacionCalculoNumerico(tk.Tk):
                 self.lbl_res_err_deriv.config(text=f"Error verd. et: {et:.6f} %")
             except ValueError:
                 messagebox.showerror("Error de entrada", "Ingrese valores numéricos válidos.")
+
+    # GAUSS
+    
+    def crear_seccion_gauss(self, parent):
+        frame = ttk.LabelFrame(parent, text=" 3. Sistemas de Ecuaciones Lineales 4x4 (Gauss) ", padding=10)
+        frame.grid(row=1, column=0, sticky=tk.NSEW, padx=5, pady=5)
+
+        frame_grid = ttk.Frame(frame)
+        frame_grid.pack(pady=2)
+
+        self.entries_A = []
+        self.entries_b = []
+
+        for j in range(4):
+            ttk.Label(frame_grid, text=f"x{j+1}", font=('Helvetica', 8, 'bold')).grid(row=0, column=j, padx=4)
+        ttk.Label(frame_grid, text="= b", font=('Helvetica', 8, 'bold')).grid(row=0, column=4, padx=4)
+
+        for i in range(4):
+            row_entries = []
+            for j in range(4):
+                ent = ttk.Entry(frame_grid, width=6, justify='center')
+                ent.grid(row=i+1, column=j, padx=2, pady=2)
+                row_entries.append(ent)
+            self.entries_A.append(row_entries)
+
+            ent_b = ttk.Entry(frame_grid, width=6, justify='center')
+            ent_b.grid(row=i+1, column=4, padx=4, pady=2)
+            self.entries_b.append(ent_b)
+
+        frame_opts = ttk.Frame(frame)
+        frame_opts.pack(pady=2)
+
+        self.var_pivoteo = tk.BooleanVar(value=True)
+        rb_con_piv = ttk.Radiobutton(frame_opts, text="Con Pivoteo", variable=self.var_pivoteo, value=True)
+        rb_con_piv.pack(side=tk.LEFT, padx=5)
+        rb_sin_piv = ttk.Radiobutton(frame_opts, text="Sin Pivoteo", variable=self.var_pivoteo, value=False)
+        rb_sin_piv.pack(side=tk.LEFT, padx=5)
+
+        btn_solve = ttk.Button(frame, text="Resolver Sistema", command=self.resolver_gauss)
+        btn_solve.pack(pady=6)
+
+        self.lbl_res_gauss = ttk.Label(frame, text="x = [---, ---, ---, ---]", font=('Helvetica', 9, 'bold'))
+        self.lbl_res_gauss.pack(anchor=tk.W, pady=2)
+
+    def resolver_gauss(self):
+        try:
+            A = []
+            for i in range(4):
+                row = []
+                for j in range(4):
+                    txt = self.entries_A[i][j].get().strip()
+                    if not txt:
+                        messagebox.showerror("Error", f"Falta ingresar A[{i+1}][{j+1}].")
+                        return
+                    row.append(float(txt))
+                A.append(row)
+
+            b = []
+            for i in range(4):
+                txt = self.entries_b[i].get().strip()
+                if not txt:
+                    messagebox.showerror("Error", f"Falta ingresar término independiente b[{i+1}].")
+                    return
+                b.append(float(txt))
+
+            if self.var_pivoteo.get():
+                x, err = gauss_con_pivoteo(A, b)
+            else:
+                x, err = gauss_sin_pivoteo(A, b)
+
+            if err or x is None:
+                messagebox.showerror("Error en Gauss", err)
+                self.lbl_res_gauss.config(text="Solución: NO DISPONIBLE")
+            else:
+                res_str = ", ".join([f"x{i+1}={val:.4f}" for i, val in enumerate(x)])
+                self.lbl_res_gauss.config(text=f"Solución: {res_str}")
+        except ValueError:
+            messagebox.showerror("Error de entrada", "Ingrese valores numéricos válidos.")
