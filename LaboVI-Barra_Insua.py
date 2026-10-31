@@ -196,3 +196,24 @@ def gauss_con_pivoteo(A_mat, b_vec):
         x[i] = (b[i] - suma) / A[i][i]
 
     return x, None
+
+# INTEGRACION NUMERICA
+
+def simpson_13_compuesta(f, a, b, n):
+    if n % 2 != 0:
+        return None, "La cantidad de segmentos 'n' debe ser un número par."
+    if n <= 0:
+        return None, "La cantidad de segmentos 'n' debe ser un entero positivo mayor a cero."
+
+    h = (b - a) / n
+    suma = f(a) + f(b)
+
+    for i in range(1, n):
+        x_i = a + i * h
+        if i % 2 != 0:
+            suma += 4.0 * f(x_i)
+        else:
+            suma += 2.0 * f(x_i)
+
+    integral = (h / 3.0) * suma
+    return integral, None
