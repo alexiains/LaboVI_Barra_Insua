@@ -217,3 +217,17 @@ def simpson_13_compuesta(f, a, b, n):
 
     integral = (h / 3.0) * suma
     return integral, None
+
+# INTERFAZ GRAFICA
+
+class AplicacionCalculoNumerico(tk.Tk):
+    def _init_(self):
+        super()._init_()
+        self.title("Laboratorio VI.1 - Calculo Numerico")
+        self.minsize(850, 600)
+
+        self.style = ttk.Style()
+        self.style.theme_use('clam')
+
+        self.scrollable_frame = ttk.Frame(self, padding="10")
+        self.scrollable_frame.pack(fill=tk.BOTH, expand=True)
