@@ -554,3 +554,62 @@ class AplicacionCalculoNumerico(tk.Tk):
                 self.lbl_res_gauss.config(text=f"Solución: {res_str}")
         except ValueError:
             messagebox.showerror("Error de entrada", "Ingrese valores numéricos válidos.")
+
+    # INTEGRACIÓN NUMÉRICA
+
+    def crear_seccion_integracion(self, parent):
+        frame = ttk.LabelFrame(parent, text=" 4. Integración Numérica (Simpson 1/3) ", padding=10)
+        frame.grid(row=1, column=1, sticky=tk.NSEW, padx=5, pady=5)
+
+        ttk.Label(frame, text="Límite inferior (a):").grid(row=0, column=0, sticky=tk.E, padx=5, pady=4)
+        self.ent_int_a = ttk.Entry(frame, width=12)
+        self.ent_int_a.grid(row=0, column=1, sticky=tk.W, padx=5, pady=4)
+
+        ttk.Label(frame, text="Límite superior (b):").grid(row=1, column=0, sticky=tk.E, padx=5, pady=4)
+        self.ent_int_b = ttk.Entry(frame, width=12)
+        self.ent_int_b.grid(row=1, column=1, sticky=tk.W, padx=5, pady=4)
+
+        ttk.Label(frame, text="Segmentos n (par):").grid(row=2, column=0, sticky=tk.E, padx=5, pady=4)
+        self.ent_int_n = ttk.Entry(frame, width=12)
+        self.ent_int_n.grid(row=2, column=1, sticky=tk.W, padx=5, pady=4)
+
+        btn_calc_int = ttk.Button(frame, text="Calcular Integral", command=self.calcular_integracion)
+        btn_calc_int.grid(row=3, column=0, columnspan=2, pady=10)
+
+        frame_res = ttk.Frame(frame)
+        frame_res.grid(row=4, column=0, columnspan=2, sticky=tk.W, pady=2)
+
+        self.lbl_res_int = ttk.Label(frame_res, text="Integral I ≈ ---", font=('Helvetica', 9, 'bold'))
+        self.lbl_res_int.pack(anchor=tk.W, pady=2)
+        self.lbl_res_h = ttk.Label(frame_res, text="Ancho h = (b-a)/n: ---")
+        self.lbl_res_h.pack(anchor=tk.W, pady=2)
+
+    def calcular_integracion(self):
+        try:
+            if not self.ent_int_a.get().strip() or not self.ent_int_b.get().strip() or not self.ent_int_n.get().strip():
+                messagebox.showerror("Error", "Ingrese los límites a, b y los segmentos n.")
+                return
+
+            a = float(self.ent_int_a.get())
+            b = float(self.ent_int_b.get())
+            n = int(self.ent_int_n.get())
+
+            coefs = self.obtener_coeficientes()
+            if all(c == 0 for c in coefs):
+                messagebox.showwarning("Atención", "Ingrese coeficientes en la sección del Polinomio P(x).")
+                return
+
+            f = lambda x_val: evaluar_polinomio(coefs, x_val)
+
+            integral, err = simpson_13_compuesta(f, a, b, n)
+
+            if err:
+                messagebox.showerror("Error en Integración", err)
+                self.lbl_res_int.config(text="Integral I ≈ ---")
+                self.lbl_res_h.config(text="Ancho h: ---")
+            else:
+                h = (b - a) / n
+                self.lbl_res_int.config(text=f"Integral I ≈ {integral:.8f}")
+                self.lbl_res_h.config(text=f"Ancho h = {h:.6f}")
+        except ValueError:
+            messagebox.showerror("Error de entrada", "Ingrese valores numéricos válidos.")
