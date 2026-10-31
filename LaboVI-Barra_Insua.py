@@ -231,3 +231,22 @@ class AplicacionCalculoNumerico(tk.Tk):
 
         self.scrollable_frame = ttk.Frame(self, padding="10")
         self.scrollable_frame.pack(fill=tk.BOTH, expand=True)
+
+        # COEFICIENTES DEL POLINOMIO
+        self.crear_seccion_polinomio(self.scrollable_frame)
+
+        # GRILLA DE LAS 4 OPERACIONES
+        frame_operaciones = ttk.Frame(self.scrollable_frame)
+        frame_operaciones.pack(fill=tk.BOTH, expand=True, pady=5)
+
+        # RAÍCES
+        self.crear_seccion_raices(frame_operaciones)
+
+        # DIFERENCIACIÓN
+        self.crear_seccion_derivacion(frame_operaciones)
+
+        # GAUSS
+        self.crear_seccion_gauss(frame_operaciones)
+
+        # INTEGRACIÓN
+        self.crear_seccion_integracion(frame_operaciones)
