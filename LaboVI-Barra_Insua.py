@@ -419,60 +419,60 @@ class AplicacionCalculoNumerico(tk.Tk):
         except ValueError:
             messagebox.showerror("Error de entrada", "Ingrese valores numéricos válidos.")
 
-#DIFERENCIACIÓN NUMÉRICA
-def crear_seccion_derivacion(self, parent):
-        frame = ttk.LabelFrame(parent, text=" 2. Diferenciación Numérica ", padding=10)
-        frame.grid(row=0, column=1, sticky=tk.NSEW, padx=5, pady=5)
-        parent.columnconfigure(1, weight=1)
+    #DIFERENCIACIÓN NUMÉRICA
+    def crear_seccion_derivacion(self, parent):
+            frame = ttk.LabelFrame(parent, text=" 2. Diferenciación Numérica ", padding=10)
+            frame.grid(row=0, column=1, sticky=tk.NSEW, padx=5, pady=5)
+            parent.columnconfigure(1, weight=1)
 
-        ttk.Label(frame, text="Punto x:").grid(row=0, column=0, sticky=tk.E, padx=5, pady=5)
-        self.ent_deriv_x = ttk.Entry(frame, width=12)
-        self.ent_deriv_x.grid(row=0, column=1, sticky=tk.W, padx=5, pady=5)
+            ttk.Label(frame, text="Punto x:").grid(row=0, column=0, sticky=tk.E, padx=5, pady=5)
+            self.ent_deriv_x = ttk.Entry(frame, width=12)
+            self.ent_deriv_x.grid(row=0, column=1, sticky=tk.W, padx=5, pady=5)
 
-        ttk.Label(frame, text="Paso h (dx):").grid(row=1, column=0, sticky=tk.E, padx=5, pady=5)
-        self.ent_deriv_h = ttk.Entry(frame, width=12)
-        self.ent_deriv_h.grid(row=1, column=1, sticky=tk.W, padx=5, pady=5)
+            ttk.Label(frame, text="Paso h (dx):").grid(row=1, column=0, sticky=tk.E, padx=5, pady=5)
+            self.ent_deriv_h = ttk.Entry(frame, width=12)
+            self.ent_deriv_h.grid(row=1, column=1, sticky=tk.W, padx=5, pady=5)
 
-        btn_calc_deriv = ttk.Button(frame, text="Calcular Derivada", command=self.calcular_derivada)
-        btn_calc_deriv.grid(row=2, column=0, columnspan=2, pady=12)
+            btn_calc_deriv = ttk.Button(frame, text="Calcular Derivada", command=self.calcular_derivada)
+            btn_calc_deriv.grid(row=2, column=0, columnspan=2, pady=12)
 
-        frame_res = ttk.Frame(frame)
-        frame_res.grid(row=3, column=0, columnspan=2, sticky=tk.W, pady=5)
+            frame_res = ttk.Frame(frame)
+            frame_res.grid(row=3, column=0, columnspan=2, sticky=tk.W, pady=5)
 
-        self.lbl_res_deriv = ttk.Label(frame_res, text="Derivada aprox. f'(x): ---", font=('Helvetica', 9, 'bold'))
-        self.lbl_res_deriv.pack(anchor=tk.W, pady=2)
-        self.lbl_res_exacta = ttk.Label(frame_res, text="Derivada exacta: ---")
-        self.lbl_res_exacta.pack(anchor=tk.W, pady=2)
-        self.lbl_res_err_deriv = ttk.Label(frame_res, text="Error verd. et (%): ---")
-        self.lbl_res_err_deriv.pack(anchor=tk.W, pady=2)
+            self.lbl_res_deriv = ttk.Label(frame_res, text="Derivada aprox. f'(x): ---", font=('Helvetica', 9, 'bold'))
+            self.lbl_res_deriv.pack(anchor=tk.W, pady=2)
+            self.lbl_res_exacta = ttk.Label(frame_res, text="Derivada exacta: ---")
+            self.lbl_res_exacta.pack(anchor=tk.W, pady=2)
+            self.lbl_res_err_deriv = ttk.Label(frame_res, text="Error verd. et (%): ---")
+            self.lbl_res_err_deriv.pack(anchor=tk.W, pady=2)
 
-def calcular_derivada(self):
-        try:
-            if not self.ent_deriv_x.get().strip() or not self.ent_deriv_h.get().strip():
-                messagebox.showerror("Error", "Ingrese el punto x y el paso h.")
-                return
+    def calcular_derivada(self):
+            try:
+                if not self.ent_deriv_x.get().strip() or not self.ent_deriv_h.get().strip():
+                    messagebox.showerror("Error", "Ingrese el punto x y el paso h.")
+                    return
 
-            x = float(self.ent_deriv_x.get())
-            h = float(self.ent_deriv_h.get())
-            if h <= 0:
-                messagebox.showerror("Error", "El paso h debe ser mayor a cero.")
-                return
+                x = float(self.ent_deriv_x.get())
+                h = float(self.ent_deriv_h.get())
+                if h <= 0:
+                    messagebox.showerror("Error", "El paso h debe ser mayor a cero.")
+                    return
 
-            coefs = self.obtener_coeficientes()
-            if all(c == 0 for c in coefs):
-                messagebox.showwarning("Atención", "Ingrese coeficientes en la sección del Polinomio P(x).")
-                return
+                coefs = self.obtener_coeficientes()
+                if all(c == 0 for c in coefs):
+                    messagebox.showwarning("Atención", "Ingrese coeficientes en la sección del Polinomio P(x).")
+                    return
 
-            f = lambda x_val: evaluar_polinomio(coefs, x_val)
-            df = lambda x_val: evaluar_derivada_polinomio(coefs, x_val)
+                f = lambda x_val: evaluar_polinomio(coefs, x_val)
+                df = lambda x_val: evaluar_derivada_polinomio(coefs, x_val)
 
-            d_aprox = diferencia_centrada(f, x, h)
-            d_exacta = df(x)
+                d_aprox = diferencia_centrada(f, x, h)
+                d_exacta = df(x)
 
-            et = abs((d_exacta - d_aprox) / d_exacta) * 100.0 if d_exacta != 0 else 0.0
+                et = abs((d_exacta - d_aprox) / d_exacta) * 100.0 if d_exacta != 0 else 0.0
 
-            self.lbl_res_deriv.config(text=f"Derivada aprox. f'({x}): {d_aprox:.8f}")
-            self.lbl_res_exacta.config(text=f"Derivada exacta: {d_exacta:.8f}")
-            self.lbl_res_err_deriv.config(text=f"Error verd. et: {et:.6f} %")
-        except ValueError:
-            messagebox.showerror("Error de entrada", "Ingrese valores numéricos válidos.")
+                self.lbl_res_deriv.config(text=f"Derivada aprox. f'({x}): {d_aprox:.8f}")
+                self.lbl_res_exacta.config(text=f"Derivada exacta: {d_exacta:.8f}")
+                self.lbl_res_err_deriv.config(text=f"Error verd. et: {et:.6f} %")
+            except ValueError:
+                messagebox.showerror("Error de entrada", "Ingrese valores numéricos válidos.")
