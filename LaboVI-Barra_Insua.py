@@ -239,7 +239,7 @@ class AplicacionCalculoNumerico(tk.Tk):
         frame_operaciones = ttk.Frame(self.scrollable_frame)
         frame_operaciones.pack(fill=tk.BOTH, expand=True, pady=5)
 
-        # RAÍCES
+        # RAiCES
         self.crear_seccion_raices(frame_operaciones)
 
         # DIFERENCIACIÓN
@@ -250,3 +250,24 @@ class AplicacionCalculoNumerico(tk.Tk):
 
         # INTEGRACIÓN
         self.crear_seccion_integracion(frame_operaciones)
+
+    # POLINOMIO (P(x))
+
+    def crear_seccion_polinomio(self, parent):
+        frame_poly = ttk.LabelFrame(parent, text=" Coeficientes del Polinomio P(x) = c0 + c1*x + c2*x² + ... + c6*x⁶ ", padding=10)
+        frame_poly.pack(fill=tk.X, pady=5)
+
+        self.entries_coefs = []
+        for i in range(7):
+            lbl_c = ttk.Label(frame_poly, text=f"c{i}:", font=('Helvetica', 9, 'bold'))
+            lbl_c.grid(row=0, column=i*2, padx=2, sticky=tk.E)
+            ent_c = ttk.Entry(frame_poly, width=8, justify='center')
+            ent_c.grid(row=0, column=i*2+1, padx=6, pady=2)
+            self.entries_coefs.append(ent_c)
+
+    def obtener_coeficientes(self):
+        coefs = []
+        for ent in self.entries_coefs:
+            txt = ent.get().strip()
+            coefs.append(float(txt) if txt else 0.0)
+        return coefs
